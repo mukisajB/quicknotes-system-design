@@ -4,10 +4,15 @@
 
 const API_URL = "https://jsonplaceholder.typicode.com/posts";
 const NOTE_LIMIT = 10;
+const MAX_TITLE_LENGTH = 100;
 
 const loadBtn = document.getElementById("load-btn");
 const statusEl = document.getElementById("status");
 const notesList = document.getElementById("notes-list");
+const noteForm = document.getElementById("note-form");
+const titleInput = document.getElementById("title-input");
+const bodyInput = document.getElementById("body-input");
+const submitBtn = document.getElementById("submit-btn");
 
 // The notes currently shown on the page, newest first.
 // "key" is a number that is unique on this page. We need it because the
@@ -49,6 +54,7 @@ function setStatus(message, type) {
 function setBusy(value) {
   busy = value;
   loadBtn.disabled = value;
+  submitBtn.disabled = value;
 }
 
 // Draws the whole list. Shows the empty state when there are no notes.
@@ -111,7 +117,66 @@ async function handleLoad() {
   }
 }
 
+// ---------- POST: create a note ----------
+
+// Returns an error message, or null when the title is fine.
+function validateTitle(title) {
+  if (title.length === 0) {
+    return "Please enter a title for your note.";
+  }
+  if (title.length > MAX_TITLE_LENGTH) {
+    return `The title is too long (${title.length} characters). Use at most ${MAX_TITLE_LENGTH}.`;
+  }
+  return null;
+}
+
+async function createNote(note) {
+  return request(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json; charset=UTF-8" },
+    body: JSON.stringify(note),
+  });
+}
+
+async function handleSubmit(event) {
+  event.preventDefault();
+
+  const title = titleInput.value.trim();
+  const body = bodyInput.value.trim(); // the body is optional
+
+  const problem = validateTitle(title);
+  if (problem) {
+    setStatus(problem, "error");
+    titleInput.setAttribute("aria-invalid", "true");
+    titleInput.focus();
+    return;
+  }
+  titleInput.removeAttribute("aria-invalid");
+
+  setBusy(true);
+  setStatus("Creating note...", "loading");
+  try {
+    const { data, status } = await createNote({ title, body, userId: 1 });
+    // Put the note the server sent back at the top of the list.
+    notes.unshift({
+      key: nextKey++,
+      id: data.id,
+      title: data.title || title,
+      body: data.body || body,
+      isLocal: true,
+    });
+    renderNotes();
+    noteForm.reset();
+    setStatus(`Note created (status ${status}, id ${data.id}).`, "success");
+  } catch (error) {
+    setStatus(friendlyError(error, "create the note"), "error");
+  } finally {
+    setBusy(false);
+  }
+}
+
 // ---------- Start-up ----------
 
 loadBtn.addEventListener("click", handleLoad);
+noteForm.addEventListener("submit", handleSubmit);
 renderNotes(); // shows the empty state before anything is loaded

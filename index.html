@@ -16,6 +16,19 @@
 
     <p id="status" class="status" role="status" aria-live="polite"></p>
 
+    <form id="note-form" novalidate>
+      <h2>New note</h2>
+
+      <label for="title-input">Title</label>
+      <input id="title-input" name="title" type="text" autocomplete="off" aria-describedby="title-hint">
+      <p id="title-hint" class="hint">Required, up to 100 characters.</p>
+
+      <label for="body-input">Body (optional)</label>
+      <textarea id="body-input" name="body" rows="4"></textarea>
+
+      <button id="submit-btn" type="submit">Add note</button>
+    </form>
+
     <h2>Notes</h2>
     <ul id="notes-list"></ul>
   </main>
