@@ -55,6 +55,9 @@ function setBusy(value) {
   busy = value;
   loadBtn.disabled = value;
   submitBtn.disabled = value;
+  document.querySelectorAll(".delete-btn").forEach((button) => {
+    button.disabled = value;
+  });
 }
 
 // Draws the whole list. Shows the empty state when there are no notes.
@@ -80,6 +83,15 @@ function renderNotes() {
     body.textContent = note.body || "(no body)";
 
     item.append(title, body);
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.type = "button";
+    deleteBtn.className = "delete-btn";
+    deleteBtn.textContent = "Delete";
+    deleteBtn.disabled = busy;
+    deleteBtn.setAttribute("aria-label", `Delete note: ${note.title}`);
+    deleteBtn.addEventListener("click", () => handleDelete(note));
+    item.appendChild(deleteBtn);
 
     notesList.appendChild(item);
   }
@@ -170,6 +182,45 @@ async function handleSubmit(event) {
     setStatus(`Note created (status ${status}, id ${data.id}).`, "success");
   } catch (error) {
     setStatus(friendlyError(error, "create the note"), "error");
+  } finally {
+    setBusy(false);
+  }
+}
+
+// ---------- DELETE: remove a note ----------
+
+// How deleting works with JSONPlaceholder (it is a practice API):
+//  - It pretends to accept changes but never saves them. A real
+//    DELETE /posts/5 answers 200 OK, yet note 5 comes back on the next load.
+//    So after a successful DELETE we remove the note from the page ourselves.
+//  - A note we created with POST was never stored. The server always gives it
+//    id 101, so every new note has the same id and DELETE /posts/101 would
+//    not refer to a real note. For these notes we skip the request, remove
+//    them locally and say so in the status message.
+//  - Because of the duplicate ids we remove notes by our own unique "key",
+//    never by "id". Otherwise deleting one new note would remove them all.
+// With a real backend every note would have a real id, and every delete would
+// simply be a DELETE request followed by removing the note from the list.
+async function deleteNote(id) {
+  return request(`${API_URL}/${id}`, { method: "DELETE" });
+}
+
+async function handleDelete(note) {
+  setBusy(true);
+  try {
+    let message;
+    if (note.isLocal) {
+      message = "Note removed. It only existed on this page, so the server was not contacted.";
+    } else {
+      setStatus("Deleting note...", "loading");
+      const { status } = await deleteNote(note.id);
+      message = `Note ${note.id} deleted (status ${status}).`;
+    }
+    notes = notes.filter((item) => item.key !== note.key);
+    renderNotes();
+    setStatus(message, "success");
+  } catch (error) {
+    setStatus(friendlyError(error, "delete the note"), "error");
   } finally {
     setBusy(false);
   }
