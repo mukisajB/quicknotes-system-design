@@ -1,0 +1,92 @@
+/* QuickNotes styles */
+:root {
+  --ink: #17252a;
+  --muted: #53666b;
+  --page: #f4f7f8;
+  --card: #ffffff;
+  --line: #d3dde0;
+  --accent: #1b6a72;
+  --accent-dark: #124d53;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--page);
+}
+
+main {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+}
+
+h1 { margin: 0 0 .25rem; }
+h2 { margin: 2rem 0 .75rem; font-size: 1.25rem; }
+.intro { margin: 0 0 1.25rem; color: var(--muted); }
+
+/* Buttons */
+button {
+  font: inherit;
+  padding: .5rem 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+button:hover:not(:disabled) { background: var(--accent-dark); }
+button:disabled { opacity: .55; cursor: not-allowed; }
+.delete-btn { background: #fff; color: #9b1c1c; border-color: #9b1c1c; }
+.delete-btn:hover:not(:disabled) { background: #fdecec; }
+
+:focus-visible { outline: 3px solid #f2a900; outline-offset: 2px; }
+
+/* Status messages: one style for each state */
+.status {
+  margin: 1rem 0;
+  padding: .6rem .8rem;
+  border: 1px solid transparent;
+  border-left-width: 6px;
+  border-radius: 6px;
+}
+.status:empty { margin: 0; padding: 0; border: 0; }
+.status.loading { background: #e8f0fb; border-color: #3b6fc1; color: #1e3a6e; }
+.status.success { background: #e3f4e8; border-color: #2e7d4f; color: #14532d; }
+.status.error   { background: #fde8e8; border-color: #c62828; color: #8a1c1c; }
+
+/* Form */
+form {
+  padding: 1rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+form h2 { margin-top: 0; }
+label { display: block; margin: .75rem 0 .25rem; font-weight: 600; }
+input, textarea {
+  width: 100%;
+  font: inherit;
+  padding: .5rem;
+  border: 1px solid #8fa1a6;
+  border-radius: 6px;
+}
+input[aria-invalid="true"] { border-color: #c62828; background: #fff7f7; }
+.hint { margin: .25rem 0 1rem; font-size: .875rem; color: var(--muted); }
+
+/* Notes list */
+ul { list-style: none; margin: 0; padding: 0; }
+.note {
+  margin-bottom: .75rem;
+  padding: .75rem 1rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.note h3 { margin: 0 0 .25rem; font-size: 1.05rem; overflow-wrap: anywhere; }
+.note p { margin: 0 0 .75rem; white-space: pre-line; overflow-wrap: anywhere; }
+.empty { padding: 1rem; color: var(--muted); border: 1px dashed var(--line); border-radius: 8px; }
